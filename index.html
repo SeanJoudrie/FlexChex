@@ -1,0 +1,431 @@
+<!doctype html>
+<html>
+<head>
+<meta charset=utf8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<title>Flexyn — Build Schedule & Task Tracker</title>
+<style>
+  :root{
+    --ground:#F7F8FA;
+    --panel:#FFFFFF;
+    --panel-2:#FCFDFE;
+    --ink:#111820;
+    --ink-2:#3D4956;
+    --ink-3:#6E7C8C;
+    --rule:#DFE4EB;
+    --rule-strong:#C6CEDA;
+    --accent:#1D4E8F;
+    --accent-soft:#E7EFFA;
+    --sean-fill:#D6E4FA;
+    --sean-ink:#1B4A8C;
+    --sean-edge:#9FBFEA;
+    --kegan-fill:#FBE2B4;
+    --kegan-ink:#8A5A08;
+    --kegan-edge:#E8BE72;
+    --both-fill:#F7C3C3;
+    --both-ink:#93201F;
+    --both-edge:#E48F8E;
+    --grey-fill:#DCE3E5;
+    --grey-ink:#4F6165;
+    --grey-edge:#B6C3C6;
+    --none-fill:#EDF0F4;
+    --none-ink:#5A6775;
+    --none-edge:#D2D9E2;
+    --done:#1D6B4A;
+    --shadow:0 1px 2px rgba(17,24,32,.05), 0 8px 24px -16px rgba(17,24,32,.28);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#0F1419;
+      --panel:#161C23;
+      --panel-2:#1A212A;
+      --ink:#E9EDF2;
+      --ink-2:#B4BECA;
+      --ink-3:#7E8B99;
+      --rule:#2A333D;
+      --rule-strong:#3A4650;
+      --accent:#7FB0F0;
+      --accent-soft:#1B2733;
+      --sean-fill:#1E3453;
+      --sean-ink:#A8CBF5;
+      --sean-edge:#33547F;
+      --kegan-fill:#43331A;
+      --kegan-ink:#EFC584;
+      --kegan-edge:#6B5127;
+      --both-fill:#4A2020;
+      --both-ink:#F0A9A8;
+      --both-edge:#743232;
+      --grey-fill:#263032;
+      --grey-ink:#A9BABE;
+      --grey-edge:#3A4A4D;
+      --none-fill:#1D242C;
+      --none-ink:#8B98A6;
+      --none-edge:#313B45;
+      --done:#5FCB9B;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#0F1419;
+    --panel:#161C23;
+    --panel-2:#1A212A;
+    --ink:#E9EDF2;
+    --ink-2:#B4BECA;
+    --ink-3:#7E8B99;
+    --rule:#2A333D;
+    --rule-strong:#3A4650;
+    --accent:#7FB0F0;
+    --accent-soft:#1B2733;
+    --sean-fill:#1E3453;
+    --sean-ink:#A8CBF5;
+    --sean-edge:#33547F;
+    --kegan-fill:#43331A;
+    --kegan-ink:#EFC584;
+    --kegan-edge:#6B5127;
+    --both-fill:#4A2020;
+    --both-ink:#F0A9A8;
+    --both-edge:#743232;
+    --grey-fill:#263032;
+    --grey-ink:#A9BABE;
+    --grey-edge:#3A4A4D;
+    --none-fill:#1D242C;
+    --none-ink:#8B98A6;
+    --none-edge:#313B45;
+    --done:#5FCB9B;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    background:var(--ground);
+    color:var(--ink);
+    font-family:"Helvetica Neue",Helvetica,Arial,system-ui,sans-serif;
+    font-size:15px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 20px 96px}
+  .masthead{border-bottom:1px solid var(--rule);background:var(--panel);padding:34px 0 26px;margin-bottom:28px;}
+  .masthead .wrap{padding-bottom:0}
+  .eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-3);font-weight:700;margin:0 0 10px;}
+  h1{font-size:clamp(28px,5vw,42px);line-height:1.04;margin:0 0 6px;letter-spacing:-.028em;font-weight:800;text-wrap:balance;}
+  .sub{margin:0;color:var(--ink-2);max-width:62ch}
+  .ship{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px 18px;margin-top:22px;padding:14px 16px;border-radius:10px;background:var(--both-fill);border:1px solid var(--both-edge);color:var(--both-ink);}
+  .ship b{font-size:19px;letter-spacing:-.01em}
+  .ship .cd{margin-inline-start:auto;font-size:13px;font-weight:700}
+  section{margin-top:34px}
+  .panel{background:var(--panel);border:1px solid var(--rule);border-radius:12px;box-shadow:var(--shadow);overflow:hidden;}
+  h2{font-size:12px;letter-spacing:.15em;text-transform:uppercase;font-weight:800;color:var(--ink-3);margin:0 0 12px;}
+  h3{font-size:19px;margin:0;letter-spacing:-.015em;font-weight:800}
+  .chip{display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:999px;font-size:11.5px;font-weight:700;letter-spacing:.02em;white-space:nowrap;border:1px solid transparent;}
+  .chip.sean{background:var(--sean-fill);color:var(--sean-ink);border-color:var(--sean-edge)}
+  .chip.kegan{background:var(--kegan-fill);color:var(--kegan-ink);border-color:var(--kegan-edge)}
+  .chip.both{background:var(--both-fill);color:var(--both-ink);border-color:var(--both-edge)}
+  .chip.grey{background:var(--grey-fill);color:var(--grey-ink);border-color:var(--grey-edge)}
+  .chip.none{background:var(--none-fill);color:var(--none-ink);border-color:var(--none-edge)}
+  .group{margin-top:26px}
+  .grouphead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;padding-bottom:9px;border-bottom:2px solid var(--ink);margin-bottom:2px;}
+  .grouphead .count{margin-inline-start:auto;font-size:12px;color:var(--ink-3);font-weight:700}
+  .grouphead .src{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);font-weight:700}
+  .subhead{display:flex;align-items:center;gap:10px;margin:16px 0 2px;padding:7px 10px;border-radius:7px;font-size:13px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;background:var(--accent-soft);color:var(--ink);}
+  .subhead.o-sean{background:var(--sean-fill);color:var(--sean-ink)}
+  .subhead.o-kegan{background:var(--kegan-fill);color:var(--kegan-ink)}
+  .subhead.o-grey{background:var(--grey-fill);color:var(--grey-ink)}
+  ul.tasks{list-style:none;margin:0;padding:0}
+  li.task{display:flex;align-items:flex-start;gap:11px;padding:7px 10px;border-bottom:1px solid var(--rule);}
+  li.task:last-child{border-bottom:0}
+  li.task.o-sean{background:var(--sean-fill)}
+  li.task.o-kegan{background:var(--kegan-fill)}
+  li.task.o-both{background:var(--both-fill)}
+  li.task.o-grey{background:var(--grey-fill)}
+  li.task.o-none{background:transparent}
+  li.task label{flex:1;cursor:pointer;display:flex;align-items:flex-start;gap:11px;min-width:0;}
+  li.task input[type=checkbox]{appearance:none;-webkit-appearance:none;flex:0 0 auto;width:17px;height:17px;margin:2px 0 0;border-radius:4px;border:1.5px solid currentColor;background:var(--panel);cursor:pointer;position:relative;opacity:.75;}
+  li.task input[type=checkbox]:checked{background:var(--done);border-color:var(--done);opacity:1}
+  li.task input[type=checkbox]:checked::after{content:"";position:absolute;inset:0;background:no-repeat center/11px 11px url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M2.5 8.5l3.5 3.5 7.5-8' fill='none' stroke='white' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/></svg>");}
+  li.task input[type=checkbox]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  li.task .txt{min-width:0;overflow-wrap:anywhere}
+  li.task.o-sean .txt{color:var(--sean-ink)}
+  li.task.o-kegan .txt{color:var(--kegan-ink)}
+  li.task.o-both .txt{color:var(--both-ink);font-weight:700}
+  li.task.o-grey .txt{color:var(--grey-ink)}
+  li.task.o-none .txt{color:var(--ink)}
+  li.task.done .txt{text-decoration:line-through;opacity:.5}
+  li.task .chip{flex:0 0 auto;margin-inline-start:auto;align-self:flex-start;margin-top:1px}
+  li.task.o-kegan + li.task.o-sean,
+  li.task.o-sean  + li.task.o-kegan,
+  li.task.o-kegan + li.task.o-grey,
+  li.task.o-sean  + li.task.o-grey,
+  li.task.o-kegan + li.task.o-both,
+  li.task.o-sean  + li.task.o-both,
+  li.task.o-none  + li.task.o-both{border-top:2px solid var(--panel);box-shadow:inset 0 2px 0 var(--rule-strong);}
+  .toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px;}
+  .toolbar button{font:inherit;font-size:12.5px;font-weight:700;padding:7px 13px;border-radius:7px;border:1px solid var(--rule-strong);background:var(--panel);color:var(--ink-2);cursor:pointer;}
+  .toolbar button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--panel)}
+  .toolbar button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .toolbar .spacer{margin-inline-start:auto}
+</style>
+</head>
+<body>
+
+<div class="masthead">
+  <div class="wrap">
+    <p class="eyebrow">Flexyn · Build Schedule & Task Tracker</p>
+    <h1>Everything we're shipping, who owns it, and when it's due</h1>
+    <p class="sub">Shared checklist. Check a box and it syncs instantly. September 18 deadline.</p>
+    <div class="ship">
+      <b>September 18 release NO LATER THAN.</b>
+      <span>Hard deadline · weekly deadlines by tuesday</span>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <section id="tasks">
+    <h2>Task list</h2>
+    <div class="toolbar">
+      <button type="button" id="reset">Clear all checkmarks</button>
+    </div>
+
+    <!-- kegan block -->
+    <div class="group">
+      <div class="grouphead">
+        <h3>kegan</h3>
+      </div>
+      <ul class="tasks">
+        <li class="task o-none"><label><input type="checkbox"><span class="txt">Database Integrity</span></label><span class="chip none">unassigned</span></li>
+        <li class="task o-none"><label><input type="checkbox"><span class="txt">UI/UX</span></label><span class="chip none">unassigned</span></li>
+      </ul>
+
+      <div class="subhead">Workout Page</div>
+      <ul class="tasks">
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Regimens</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Goals</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">All Workouts</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Duels</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Bounties</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Gym Rival</span></label><span class="chip sean">Sean</span></li>
+      </ul>
+
+      <div class="subhead o-sean">Hub</div>
+      <ul class="tasks">
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Global Feed</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Following Feed</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Crews</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Stories</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Build Your Feed</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">New Post</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Hub Filters</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Hub Post Containers</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Repost</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Share</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Mute</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Block</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Report</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Marketplace</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Confirm profile avatar and @username routes to selected users profile page</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Likes</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Comments</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Stickers</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Replies</span></label><span class="chip sean">Sean</span></li>
+      </ul>
+    </div>
+
+    <!-- nutrition -->
+    <div class="group">
+      <div class="grouphead">
+        <h3>Nutritition</h3>
+      </div>
+
+      <div class="subhead o-kegan">Meal Logging</div>
+      <ul class="tasks">
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Log meal (manual entry)</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Recognize meal (photo via AI)</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Search food database</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Macros display</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Calories display</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Quick add (favorites)</span></label><span class="chip sean">Sean</span></li>
+      </ul>
+
+      <div class="subhead o-kegan">Meal Plans</div>
+      <ul class="tasks">
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">View assigned plan</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Meal suggestions</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Swap meals</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Mark completed</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Day view</span></label><span class="chip sean">Sean</span></li>
+      </ul>
+
+      <div class="subhead o-kegan">Food Database</div>
+      <ul class="tasks">
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Search by name</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Filter by macro profile</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Barcode scan</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Add custom food</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Recent foods</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Favorites</span></label><span class="chip sean">Sean</span></li>
+      </ul>
+
+      <div class="subhead">Recipes</div>
+      <ul class="tasks">
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">View saved recipes</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Create recipe</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Log recipe as meal</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Share recipe to crew</span></label><span class="chip sean">Sean</span></li>
+      </ul>
+
+      <div class="subhead o-kegan">Dashboard</div>
+      <ul class="tasks">
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Daily macros (carbs/protein/fat)</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Calorie budget remaining</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Macro pie chart</span></label><span class="chip kegan">Kegan</span></li>
+      </ul>
+    </div>
+  </section>
+</div>
+
+<script>
+class ChecklistSync {
+  constructor(userName = 'anonymous') {
+    this.userName = userName;
+    this.supabaseUrl = 'https://ebvqxuwfiptcmlkhflfj.supabase.co';
+    this.supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVidnF4dXdmaXB0Y21sa2hmbGZqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEwOTkwNDQsImV4cCI6MjA2NjY3NTA0NH0.2JpXgHo7LKchMH83qEQf4r5d5dFAhCaWvz0c-FRFXEk';
+    this.initialized = false;
+  }
+
+  async init() {
+    if (this.initialized) return;
+    await this.loadInitialState();
+    this.setupLocalListeners();
+    this.setupRealtimeListener();
+    this.initialized = true;
+  }
+
+  async loadInitialState() {
+    try {
+      const response = await fetch(
+        `${this.supabaseUrl}/rest/v1/checklist_items?select=*`,
+        {
+          headers: {
+            'Authorization': `Bearer ${this.supabaseKey}`,
+            'apikey': this.supabaseKey,
+            'Accept': 'application/json'
+          }
+        }
+      );
+
+      const tasks = await response.json();
+      tasks.forEach(task => {
+        const checkbox = this.findCheckboxByName(task.task_name);
+        if (checkbox) checkbox.checked = task.is_completed;
+      });
+    } catch (error) {
+      console.error('Failed to load tasks:', error);
+    }
+  }
+
+  setupLocalListeners() {
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach((checkbox) => {
+      checkbox.addEventListener('change', (e) => this.handleLocalChange(checkbox));
+    });
+  }
+
+  async handleLocalChange(checkbox) {
+    const taskName = this.getTaskNameFromCheckbox(checkbox);
+    if (!taskName) return;
+
+    try {
+      await fetch(
+        `${this.supabaseUrl}/rest/v1/checklist_items?task_name=eq.${encodeURIComponent(taskName)}`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Authorization': `Bearer ${this.supabaseKey}`,
+            'apikey': this.supabaseKey,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+          },
+          body: JSON.stringify({
+            is_completed: checkbox.checked,
+            updated_at: new Date().toISOString(),
+            updated_by: this.userName
+          })
+        }
+      );
+    } catch (error) {
+      console.error('Sync error:', error);
+      checkbox.checked = !checkbox.checked;
+    }
+  }
+
+  setupRealtimeListener() {
+    setInterval(() => this.pollForRemoteChanges(), 2000);
+  }
+
+  async pollForRemoteChanges() {
+    try {
+      const response = await fetch(
+        `${this.supabaseUrl}/rest/v1/checklist_items?select=*`,
+        {
+          headers: {
+            'Authorization': `Bearer ${this.supabaseKey}`,
+            'apikey': this.supabaseKey,
+            'Accept': 'application/json'
+          }
+        }
+      );
+
+      const tasks = await response.json();
+      tasks.forEach(task => {
+        const checkbox = this.findCheckboxByName(task.task_name);
+        if (checkbox && checkbox.checked !== task.is_completed) {
+          checkbox.checked = task.is_completed;
+          checkbox.style.transition = 'background-color 0.3s';
+          checkbox.style.backgroundColor = '#5FCB9B';
+          setTimeout(() => checkbox.style.backgroundColor = '', 300);
+        }
+      });
+    } catch (error) {
+      // silent fail
+    }
+  }
+
+  getTaskNameFromCheckbox(checkbox) {
+    const textSpan = checkbox.parentElement?.querySelector('.txt');
+    return textSpan ? textSpan.textContent.trim() : null;
+  }
+
+  findCheckboxByName(taskName) {
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    for (const checkbox of checkboxes) {
+      const textSpan = checkbox.parentElement?.querySelector('.txt');
+      if (textSpan && textSpan.textContent.trim() === taskName) {
+        return checkbox;
+      }
+    }
+    return null;
+  }
+}
+
+// Init on page load
+let userName = localStorage.getItem('checklistUser');
+if (!userName) {
+  userName = prompt('Enter your name (Sean or Kegan):') || 'anonymous';
+  if (userName) localStorage.setItem('checklistUser', userName);
+}
+
+const sync = new ChecklistSync(userName);
+sync.init();
+
+// Reset button
+document.getElementById('reset').addEventListener('click', () => {
+  if (confirm('Clear all checkmarks?')) {
+    document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+  }
+});
+</script>
+
+</body>
+</html>
