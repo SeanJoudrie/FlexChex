@@ -1384,6 +1384,7 @@
     });
 
     paintBtn();
+    (window.FXREG = window.FXREG || []).push({ key: key, btn: paintBtn, panel: paintPanel, el: panel });
   });
 
   /* ---------- export / import notes (localStorage is per-device) ---------- */
@@ -1450,6 +1451,168 @@
     boxes.forEach(function(b){ b.checked = false; b.closest("li.task").classList.remove("done"); });
     state = {}; save(); recount();
   });
+
+  /* handle for the shared-sync layer below — read/write access to the same
+     objects this script already uses, so nothing above needed rewriting */
+  window.FXSTATE = {
+    notes:     function(){ return notes; },
+    state:     function(){ return state; },
+    who:       function(){ return whoami; },
+    saveNotes: function(){ return saveNotes(); },
+    save:      function(){ return save(); },
+    recount:   function(){ return recount(); }
+  };
+})();
+</script>
+
+<script>
+/* =======================================================================
+   SHARED SYNC — added underneath the tracker. Changes nothing above it:
+   no task, heading, owner, comment, count or style was touched.
+
+   Backed by its own Supabase project (FlexChex-Tracker /
+   sjqzmwlxuuccguymougc). Separate database, separate credentials. It has
+   no connection whatsoever to the Flexyn app or the Flexyn database.
+
+   One row per task, carrying that task's checkbox AND its comment thread,
+   so two people working different tasks can never overwrite each other.
+   If the network is down the page keeps working off localStorage exactly
+   as before, and pushes whatever changed once it reconnects.
+   ======================================================================= */
+(function(){
+  var API = "https://sjqzmwlxuuccguymougc.supabase.co/rest/v1/tasks";
+  var AK  = "sb_publishable_w7kZVLqkOQJoxvS78lppdw_xh5BOton";
+  var HDR = { apikey: AK, Authorization: "Bearer " + AK, "Content-Type": "application/json" };
+
+  var FX  = window.FXSTATE;
+  var REG = window.FXREG || [];
+  if (!FX || !REG.length) return;
+
+  /* ---- status pill ---- */
+  var pill = document.createElement("div");
+  pill.style.cssText =
+    "position:fixed;right:14px;bottom:14px;z-index:80;padding:7px 13px;border-radius:999px;" +
+    "font:700 11.5px/1 -apple-system,BlinkMacSystemFont,Helvetica,sans-serif;letter-spacing:.04em;" +
+    "border:1px solid;box-shadow:0 2px 10px rgba(0,0,0,.16);pointer-events:none";
+  document.body.appendChild(pill);
+  var online = true;
+  function say(txt, ok){
+    online = ok !== false;
+    pill.textContent = txt;
+    pill.style.background  = online ? "#D6E4FA" : "#F7C3C3";
+    pill.style.color       = online ? "#1B4A8C" : "#93201F";
+    pill.style.borderColor = online ? "#9FBFEA" : "#E48F8E";
+  }
+  say("connecting…");
+
+  /* ---- task key -> its checkbox + repaint hooks ---- */
+  var map = {};
+  REG.forEach(function(r){
+    var li = r.el.closest("li.task");
+    if (!li) return;
+    map[r.key] = { box: li.querySelector("input[type=checkbox]"), btn: r.btn, paint: r.panel, el: r.el };
+  });
+  var keys = Object.keys(map);
+
+  var applying = false;
+  var lastSync = "1970-01-01T00:00:00+00:00";
+  var fp = {};
+
+  /* cheap change detector: checked state + comment count + newest comment time */
+  function sig(k){
+    var n = FX.notes()[k] || [], b = map[k].box;
+    return (b && b.checked ? 1 : 0) + "|" + n.length + "|" + (n.length ? n[n.length - 1].at : 0);
+  }
+
+  function row(k){
+    return {
+      task_key:     k,
+      is_completed: !!(map[k].box && map[k].box.checked),
+      notes:        FX.notes()[k] || [],
+      updated_by:   FX.who()      /* updated_at is stamped by the database */
+    };
+  }
+
+  function push(ks){
+    if (!ks.length) return Promise.resolve();
+    say("saving…");
+    return fetch(API, {
+      method:  "POST",
+      headers: Object.assign({}, HDR, { Prefer: "resolution=merge-duplicates,return=minimal" }),
+      body:    JSON.stringify(ks.map(row))
+    }).then(function(r){
+      if (!r.ok) throw new Error(r.status);
+      say("shared · saved");
+    }).catch(function(){
+      say("offline — saved on this device only", false);
+    });
+  }
+
+  function apply(rows){
+    if (!rows || !rows.length) return;
+    applying = true;
+    var notes = FX.notes();
+    rows.forEach(function(r){
+      if (r.updated_at > lastSync) lastSync = r.updated_at;
+      var m = map[r.task_key];
+      if (!m) return;
+
+      var arr = Array.isArray(r.notes) ? r.notes : [];
+      if (arr.length) notes[r.task_key] = arr; else delete notes[r.task_key];
+
+      if (m.box && m.box.checked !== !!r.is_completed){
+        m.box.checked = !!r.is_completed;
+        m.box.dispatchEvent(new Event("change"));   /* lets the original code update state + counts */
+      }
+      m.btn();
+      if (!m.el.hidden) m.paint();
+      fp[r.task_key] = sig(r.task_key);
+    });
+    FX.saveNotes();
+    FX.recount();
+    applying = false;
+  }
+
+  function pull(){
+    return fetch(API + "?select=task_key,is_completed,notes,updated_at&updated_at=gt." +
+                 encodeURIComponent(lastSync), { headers: HDR })
+      .then(function(r){ if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function(rows){
+        apply(rows);
+        if (!online) say("shared · saved");
+      })
+      .catch(function(){
+        say("offline — saved on this device only", false);
+      });
+  }
+
+  /* boot: whatever is on the server wins, then seed anything it has never seen */
+  pull().then(function(){
+    keys.forEach(function(k){ fp[k] = sig(k); });
+    if (online) say("shared · saved");
+    return fetch(API + "?select=task_key", { headers: HDR })
+      .then(function(r){ return r.json(); })
+      .then(function(have){
+        var known = {};
+        (have || []).forEach(function(r){ known[r.task_key] = 1; });
+        var missing = keys.filter(function(k){
+          return !known[k] && ((map[k].box && map[k].box.checked) || (FX.notes()[k] || []).length);
+        });
+        if (missing.length) return push(missing);
+      })
+      .catch(function(){});
+  });
+
+  setInterval(function(){                      /* local -> server */
+    if (applying) return;
+    var dirty = keys.filter(function(k){ return sig(k) !== fp[k]; });
+    if (!dirty.length) return;
+    dirty.forEach(function(k){ fp[k] = sig(k); });
+    push(dirty);
+  }, 1200);
+
+  setInterval(function(){ if (!applying) pull(); }, 5000);   /* server -> local */
+  document.addEventListener("visibilitychange", function(){ if (!document.hidden) pull(); });
 })();
 </script>
 
