@@ -1,0 +1,62 @@
+{
+  "tasks": [
+    {"key": "kegan_database_integrity", "name": "Database Integrity", "owner": "unassigned", "section": "kegan"},
+    {"key": "kegan_uiux", "name": "UI/UX", "owner": "unassigned", "section": "kegan"},
+
+    {"key": "kegan_regimens", "name": "Regimens", "owner": "kegan", "section": "Workout Page"},
+    {"key": "kegan_goals", "name": "Goals", "owner": "kegan", "section": "Workout Page"},
+    {"key": "kegan_all_workouts", "name": "All Workouts", "owner": "kegan", "section": "Workout Page"},
+    {"key": "sean_duels", "name": "Duels", "owner": "sean", "section": "Workout Page"},
+    {"key": "sean_bounties", "name": "Bounties", "owner": "sean", "section": "Workout Page"},
+    {"key": "sean_gym_rival", "name": "Gym Rival", "owner": "sean", "section": "Workout Page"},
+
+    {"key": "sean_global_feed", "name": "Global Feed", "owner": "sean", "section": "Hub"},
+    {"key": "sean_following_feed", "name": "Following Feed", "owner": "sean", "section": "Hub"},
+    {"key": "sean_crews", "name": "Crews", "owner": "sean", "section": "Hub"},
+    {"key": "sean_stories", "name": "Stories", "owner": "sean", "section": "Hub"},
+    {"key": "sean_build_feed", "name": "Build Your Feed", "owner": "sean", "section": "Hub"},
+    {"key": "sean_new_post", "name": "New Post", "owner": "sean", "section": "Hub"},
+    {"key": "sean_hub_filters", "name": "Hub Filters", "owner": "sean", "section": "Hub"},
+    {"key": "sean_hub_containers", "name": "Hub Post Containers", "owner": "sean", "section": "Hub"},
+    {"key": "sean_repost", "name": "Repost", "owner": "sean", "section": "Hub"},
+    {"key": "sean_share", "name": "Share", "owner": "sean", "section": "Hub"},
+    {"key": "sean_mute", "name": "Mute", "owner": "sean", "section": "Hub"},
+    {"key": "sean_block", "name": "Block", "owner": "sean", "section": "Hub"},
+    {"key": "sean_report", "name": "Report", "owner": "sean", "section": "Hub"},
+    {"key": "sean_marketplace", "name": "Marketplace", "owner": "sean", "section": "Hub"},
+    {"key": "sean_avatar_username", "name": "Confirm profile avatar and @username routes to selected users profile page", "owner": "sean", "section": "Hub"},
+    {"key": "sean_likes", "name": "Likes", "owner": "sean", "section": "Hub"},
+    {"key": "sean_comments", "name": "Comments", "owner": "sean", "section": "Hub"},
+    {"key": "sean_stickers", "name": "Stickers", "owner": "sean", "section": "Hub"},
+    {"key": "sean_replies", "name": "Replies", "owner": "sean", "section": "Hub"},
+
+    {"key": "kegan_log_meal_manual", "name": "Log meal (manual entry)", "owner": "kegan", "section": "Meal Logging"},
+    {"key": "kegan_recognize_meal", "name": "Recognize meal (photo via AI)", "owner": "kegan", "section": "Meal Logging"},
+    {"key": "kegan_search_food_db", "name": "Search food database", "owner": "kegan", "section": "Meal Logging"},
+    {"key": "kegan_macros_display", "name": "Macros display", "owner": "kegan", "section": "Meal Logging"},
+    {"key": "kegan_calories_display", "name": "Calories display", "owner": "kegan", "section": "Meal Logging"},
+    {"key": "sean_quick_add", "name": "Quick add (favorites)", "owner": "sean", "section": "Meal Logging"},
+
+    {"key": "kegan_view_plan", "name": "View assigned plan", "owner": "kegan", "section": "Meal Plans"},
+    {"key": "kegan_meal_suggestions", "name": "Meal suggestions", "owner": "kegan", "section": "Meal Plans"},
+    {"key": "kegan_swap_meals", "name": "Swap meals", "owner": "kegan", "section": "Meal Plans"},
+    {"key": "kegan_mark_completed", "name": "Mark completed", "owner": "kegan", "section": "Meal Plans"},
+    {"key": "sean_day_view", "name": "Day view", "owner": "sean", "section": "Meal Plans"},
+
+    {"key": "kegan_search_name", "name": "Search by name", "owner": "kegan", "section": "Food Database"},
+    {"key": "kegan_filter_macro", "name": "Filter by macro profile", "owner": "kegan", "section": "Food Database"},
+    {"key": "kegan_barcode_scan", "name": "Barcode scan", "owner": "kegan", "section": "Food Database"},
+    {"key": "kegan_add_custom", "name": "Add custom food", "owner": "kegan", "section": "Food Database"},
+    {"key": "sean_recent_foods", "name": "Recent foods", "owner": "sean", "section": "Food Database"},
+    {"key": "sean_favorites_foods", "name": "Favorites", "owner": "sean", "section": "Food Database"},
+
+    {"key": "sean_view_recipes", "name": "View saved recipes", "owner": "sean", "section": "Recipes"},
+    {"key": "sean_create_recipe", "name": "Create recipe", "owner": "sean", "section": "Recipes"},
+    {"key": "sean_log_recipe", "name": "Log recipe as meal", "owner": "sean", "section": "Recipes"},
+    {"key": "sean_share_recipe", "name": "Share recipe to crew", "owner": "sean", "section": "Recipes"},
+
+    {"key": "kegan_daily_macros", "name": "Daily macros (carbs/protein/fat)", "owner": "kegan", "section": "Dashboard"},
+    {"key": "kegan_calorie_budget", "name": "Calorie budget remaining", "owner": "kegan", "section": "Dashboard"},
+    {"key": "kegan_macro_pie", "name": "Macro pie chart", "owner": "kegan", "section": "Dashboard"}
+  ]
+}
