@@ -1,0 +1,1456 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}</style></head><body>
+<title>Flexyn — Build Schedule &amp; Task Tracker</title>
+<style>
+  :root{
+    --ground:#F7F8FA;
+    --panel:#FFFFFF;
+    --panel-2:#FCFDFE;
+    --ink:#111820;
+    --ink-2:#3D4956;
+    --ink-3:#6E7C8C;
+    --rule:#DFE4EB;
+    --rule-strong:#C6CEDA;
+    --accent:#1D4E8F;
+    --accent-soft:#E7EFFA;
+
+    --sean-fill:#D6E4FA;
+    --sean-ink:#1B4A8C;
+    --sean-edge:#9FBFEA;
+
+    --kegan-fill:#FBE2B4;
+    --kegan-ink:#8A5A08;
+    --kegan-edge:#E8BE72;
+
+    --both-fill:#F7C3C3;
+    --both-ink:#93201F;
+    --both-edge:#E48F8E;
+
+    --grey-fill:#DCE3E5;
+    --grey-ink:#4F6165;
+    --grey-edge:#B6C3C6;
+
+    --none-fill:#EDF0F4;
+    --none-ink:#5A6775;
+    --none-edge:#D2D9E2;
+
+    --done:#1D6B4A;
+    --shadow:0 1px 2px rgba(17,24,32,.05), 0 8px 24px -16px rgba(17,24,32,.28);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#0F1419;
+      --panel:#161C23;
+      --panel-2:#1A212A;
+      --ink:#E9EDF2;
+      --ink-2:#B4BECA;
+      --ink-3:#7E8B99;
+      --rule:#2A333D;
+      --rule-strong:#3A4650;
+      --accent:#7FB0F0;
+      --accent-soft:#1B2733;
+
+      --sean-fill:#1E3453;
+      --sean-ink:#A8CBF5;
+      --sean-edge:#33547F;
+
+      --kegan-fill:#43331A;
+      --kegan-ink:#EFC584;
+      --kegan-edge:#6B5127;
+
+      --both-fill:#4A2020;
+      --both-ink:#F0A9A8;
+      --both-edge:#743232;
+
+      --grey-fill:#263032;
+      --grey-ink:#A9BABE;
+      --grey-edge:#3A4A4D;
+
+      --none-fill:#1D242C;
+      --none-ink:#8B98A6;
+      --none-edge:#313B45;
+
+      --done:#5FCB9B;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#0F1419;
+    --panel:#161C23;
+    --panel-2:#1A212A;
+    --ink:#E9EDF2;
+    --ink-2:#B4BECA;
+    --ink-3:#7E8B99;
+    --rule:#2A333D;
+    --rule-strong:#3A4650;
+    --accent:#7FB0F0;
+    --accent-soft:#1B2733;
+
+    --sean-fill:#1E3453;
+    --sean-ink:#A8CBF5;
+    --sean-edge:#33547F;
+
+    --kegan-fill:#43331A;
+    --kegan-ink:#EFC584;
+    --kegan-edge:#6B5127;
+
+    --both-fill:#4A2020;
+    --both-ink:#F0A9A8;
+    --both-edge:#743232;
+
+    --grey-fill:#263032;
+    --grey-ink:#A9BABE;
+    --grey-edge:#3A4A4D;
+
+    --none-fill:#1D242C;
+    --none-ink:#8B98A6;
+    --none-edge:#313B45;
+
+    --done:#5FCB9B;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -16px rgba(0,0,0,.8);
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    background:var(--ground);
+    color:var(--ink);
+    font-family:"Helvetica Neue",Helvetica,Arial,system-ui,sans-serif;
+    font-size:15px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
+
+  .wrap{max-width:1080px;margin:0 auto;padding:0 20px 96px}
+
+  /* ---------- masthead ---------- */
+  .masthead{
+    border-bottom:1px solid var(--rule);
+    background:var(--panel);
+    padding:34px 0 26px;
+    margin-bottom:28px;
+  }
+  .masthead .wrap{padding-bottom:0}
+  .eyebrow{
+    font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--ink-3);font-weight:700;margin:0 0 10px;
+  }
+  h1{
+    font-size:clamp(28px,5vw,42px);line-height:1.04;margin:0 0 6px;
+    letter-spacing:-.028em;font-weight:800;text-wrap:balance;
+  }
+  .sub{margin:0;color:var(--ink-2);max-width:62ch}
+
+  .ship{
+    display:flex;flex-wrap:wrap;align-items:baseline;gap:10px 18px;
+    margin-top:22px;padding:14px 16px;border-radius:10px;
+    background:var(--both-fill);border:1px solid var(--both-edge);color:var(--both-ink);
+  }
+  .ship b{font-size:19px;letter-spacing:-.01em}
+  .ship .cd{margin-inline-start:auto;font-size:13px;font-weight:700}
+
+  /* ---------- generic panel ---------- */
+  section{margin-top:34px}
+  .panel{
+    background:var(--panel);border:1px solid var(--rule);border-radius:12px;
+    box-shadow:var(--shadow);overflow:hidden;
+  }
+  h2{
+    font-size:12px;letter-spacing:.15em;text-transform:uppercase;font-weight:800;
+    color:var(--ink-3);margin:0 0 12px;
+  }
+  h3{font-size:19px;margin:0;letter-spacing:-.015em;font-weight:800}
+
+  /* ---------- deadline table ---------- */
+  .tablewrap{overflow-x:auto}
+  table{border-collapse:collapse;width:100%;min-width:640px}
+  thead th{
+    text-align:start;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--ink-3);font-weight:700;padding:12px 16px;border-bottom:1px solid var(--rule-strong);
+    background:var(--panel-2);white-space:nowrap;
+  }
+  tbody td{padding:11px 16px;border-bottom:1px solid var(--rule);vertical-align:middle}
+  tbody tr:last-child td{border-bottom:0}
+  tbody tr.past td{background:var(--panel-2)}
+  td.date{font-weight:700;white-space:nowrap;width:1%}
+  td.sect{font-weight:700}
+  .daysleft{font-size:12px;color:var(--ink-3);white-space:nowrap}
+  .daysleft.warn{color:var(--both-ink);font-weight:700}
+
+  /* ---------- owner chips ---------- */
+  .chip{
+    display:inline-flex;align-items:center;gap:5px;
+    padding:2px 9px;border-radius:999px;font-size:11.5px;font-weight:700;
+    letter-spacing:.02em;white-space:nowrap;border:1px solid transparent;
+  }
+  .chip.sean{background:var(--sean-fill);color:var(--sean-ink);border-color:var(--sean-edge)}
+  .chip.kegan{background:var(--kegan-fill);color:var(--kegan-ink);border-color:var(--kegan-edge)}
+  .chip.both{background:var(--both-fill);color:var(--both-ink);border-color:var(--both-edge)}
+  .chip.grey{background:var(--grey-fill);color:var(--grey-ink);border-color:var(--grey-edge)}
+  .chip.none{background:var(--none-fill);color:var(--none-ink);border-color:var(--none-edge)}
+
+  /* ---------- notes / side points ---------- */
+  .notegrid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+  .note{
+    background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:14px 16px;
+  }
+  .note .lbl{
+    font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3);
+    font-weight:700;margin-bottom:8px;
+  }
+  .note ul{margin:0;padding-inline-start:18px}
+  .note li{margin:3px 0}
+  .verbatim{color:var(--ink)}
+
+  /* ---------- legend ---------- */
+  .legend{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px}
+  .legend .item{
+    display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-2);
+    background:var(--panel);border:1px solid var(--rule);border-radius:8px;padding:7px 11px;
+  }
+  .sw{width:13px;height:13px;border-radius:3px;border:1px solid}
+  .sw.sean{background:var(--sean-fill);border-color:var(--sean-edge)}
+  .sw.kegan{background:var(--kegan-fill);border-color:var(--kegan-edge)}
+  .sw.both{background:var(--both-fill);border-color:var(--both-edge)}
+  .sw.grey{background:var(--grey-fill);border-color:var(--grey-edge)}
+  .sw.none{background:var(--none-fill);border-color:var(--none-edge)}
+
+  /* ---------- progress bars ---------- */
+  .stats{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+  .stat{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:13px 15px}
+  .stat .k{font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3);font-weight:700}
+  .stat .v{font-size:25px;font-weight:800;letter-spacing:-.02em;margin-top:3px}
+  .stat .v small{font-size:14px;font-weight:600;color:var(--ink-3)}
+  .bar{height:5px;border-radius:99px;background:var(--rule);margin-top:9px;overflow:hidden}
+  .bar > i{display:block;height:100%;border-radius:99px;transition:width .3s ease}
+  .bar.sean > i{background:var(--sean-ink)}
+  .bar.kegan > i{background:var(--kegan-ink)}
+  .bar.all > i{background:var(--done)}
+
+  /* ---------- task groups ---------- */
+  .group{margin-top:26px}
+  .grouphead{
+    display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;
+    padding-bottom:9px;border-bottom:2px solid var(--ink);margin-bottom:2px;
+  }
+  .grouphead .count{margin-inline-start:auto;font-size:12px;color:var(--ink-3);font-weight:700}
+  .grouphead .src{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);font-weight:700}
+
+  .subhead{
+    display:flex;align-items:center;gap:10px;
+    margin:16px 0 2px;padding:7px 10px;border-radius:7px;
+    font-size:13px;font-weight:800;letter-spacing:.03em;text-transform:uppercase;
+    background:var(--accent-soft);color:var(--ink);
+  }
+  .subhead.o-sean{background:var(--sean-fill);color:var(--sean-ink)}
+  .subhead.o-kegan{background:var(--kegan-fill);color:var(--kegan-ink)}
+  .subhead.o-grey{background:var(--grey-fill);color:var(--grey-ink)}
+
+  ul.tasks{list-style:none;margin:0;padding:0}
+  li.task{
+    display:flex;align-items:flex-start;gap:11px;
+    padding:7px 10px;border-bottom:1px solid var(--rule);
+  }
+  li.task:last-child{border-bottom:0}
+  li.task.o-sean{background:var(--sean-fill)}
+  li.task.o-kegan{background:var(--kegan-fill)}
+  li.task.o-both{background:var(--both-fill)}
+  li.task.o-grey{background:var(--grey-fill)}
+  li.task.o-none{background:transparent}
+
+  li.task label{
+    flex:1;cursor:pointer;display:flex;align-items:flex-start;gap:11px;min-width:0;
+  }
+  li.task input[type=checkbox]{
+    appearance:none;-webkit-appearance:none;
+    flex:0 0 auto;width:17px;height:17px;margin:2px 0 0;border-radius:4px;
+    border:1.5px solid currentColor;background:var(--panel);cursor:pointer;
+    position:relative;opacity:.75;
+  }
+  li.task input[type=checkbox]:checked{background:var(--done);border-color:var(--done);opacity:1}
+  li.task input[type=checkbox]:checked::after{
+    content:"";position:absolute;inset:0;
+    background:no-repeat center/11px 11px url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M2.5 8.5l3.5 3.5 7.5-8' fill='none' stroke='white' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+  }
+  li.task input[type=checkbox]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  li.task .txt{min-width:0;overflow-wrap:anywhere}
+  li.task.o-sean .txt{color:var(--sean-ink)}
+  li.task.o-kegan .txt{color:var(--kegan-ink)}
+  li.task.o-both .txt{color:var(--both-ink);font-weight:700}
+  li.task.o-grey .txt{color:var(--grey-ink)}
+  li.task.o-none .txt{color:var(--ink)}
+  li.task.done .txt{text-decoration:line-through;opacity:.5}
+  li.task .chip{flex:0 0 auto;margin-inline-start:auto;align-self:flex-start;margin-top:1px}
+
+  /* seam where the owner block changes — makes each section read as halves */
+  li.task.o-kegan + li.task.o-sean,
+  li.task.o-sean  + li.task.o-kegan,
+  li.task.o-kegan + li.task.o-grey,
+  li.task.o-sean  + li.task.o-grey,
+  li.task.o-kegan + li.task.o-both,
+  li.task.o-sean  + li.task.o-both,
+  li.task.o-none  + li.task.o-both{
+    border-top:2px solid var(--panel);
+    box-shadow:inset 0 2px 0 var(--rule-strong);
+  }
+
+  /* owner split readout on each subsection header */
+  .split{
+    margin-inline-start:auto;display:flex;align-items:center;gap:6px;
+    font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:none;
+  }
+  .split .s{padding:1px 7px;border-radius:999px;border:1px solid}
+  .split .s.k{background:var(--kegan-fill);color:var(--kegan-ink);border-color:var(--kegan-edge)}
+  .split .s.b{background:var(--sean-fill);color:var(--sean-ink);border-color:var(--sean-edge)}
+  .split .s.g{background:var(--grey-fill);color:var(--grey-ink);border-color:var(--grey-edge)}
+  .split .s.r{background:var(--both-fill);color:var(--both-ink);border-color:var(--both-edge)}
+
+  /* head to head */
+  .h2h{
+    margin-top:14px;background:var(--panel);border:1px solid var(--rule);
+    border-radius:12px;padding:18px 20px;box-shadow:var(--shadow);
+  }
+  .h2h .top{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+  .h2h .top h3{font-size:16px}
+  .h2h .verdict{font-size:13px;font-weight:700;color:var(--ink-2)}
+  .h2hbar{display:flex;height:34px;border-radius:8px;overflow:hidden;border:1px solid var(--rule-strong)}
+  .h2hbar span{
+    display:flex;align-items:center;justify-content:center;
+    font-size:12.5px;font-weight:800;white-space:nowrap;overflow:hidden;
+  }
+  .h2hbar .k{background:var(--kegan-fill);color:var(--kegan-ink)}
+  .h2hbar .b{background:var(--sean-fill);color:var(--sean-ink)}
+  .h2hbar .r{background:var(--both-fill);color:var(--both-ink)}
+  .h2hbar .g{background:var(--grey-fill);color:var(--grey-ink)}
+  .h2h .caveat{margin:11px 0 0;font-size:12.5px;color:var(--ink-3)}
+  .h2h .caveat b{color:var(--ink-2)}
+  li.task.blank{opacity:.5;font-style:italic}
+  li.task.blank .txt{font-size:12px;color:var(--ink-3)}
+
+  .redcall{
+    display:inline-block;margin-top:12px;padding:7px 13px;border-radius:7px;
+    background:var(--both-fill);border:1px solid var(--both-edge);color:var(--both-ink);
+    font-weight:800;font-size:13px;
+  }
+
+  .flagbox{
+    margin-top:14px;padding:14px 16px;border-radius:10px;
+    background:var(--grey-fill);border:1px solid var(--grey-edge);color:var(--grey-ink);
+  }
+  .flagbox b{color:var(--grey-ink)}
+  .flagbox p{margin:0 0 8px}
+  .flagbox p:last-child{margin-bottom:0}
+
+  .toolbar{
+    display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px;
+  }
+  .toolbar button{
+    font:inherit;font-size:12.5px;font-weight:700;padding:7px 13px;border-radius:7px;
+    border:1px solid var(--rule-strong);background:var(--panel);color:var(--ink-2);cursor:pointer;
+  }
+  .toolbar button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--panel)}
+  .toolbar button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .toolbar .spacer{margin-inline-start:auto}
+
+  body.filter-sean li.task:not(.o-sean):not(.o-both){display:none}
+  body.filter-kegan li.task:not(.o-kegan):not(.o-both){display:none}
+  body.filter-notes li.task:not(.hasnote){display:none}
+
+  footer{margin-top:44px;padding-top:18px;border-top:1px solid var(--rule);color:var(--ink-3);font-size:12.5px}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+  /* ============ comments on a task ============ */
+  li.task{flex-wrap:wrap}
+  li.task label{flex:1 1 auto}
+
+  .cbtn{
+    flex:0 0 auto;align-self:flex-start;margin-top:0;
+    display:inline-flex;align-items:center;gap:5px;
+    border:1px solid var(--rule-strong);background:var(--panel);
+    color:var(--ink-3);border-radius:999px;cursor:pointer;
+    font:inherit;font-size:11px;font-weight:800;line-height:1;
+    padding:5px 8px;transition:background .12s,color .12s,border-color .12s;
+  }
+  .cbtn:hover{background:var(--band);color:var(--ink-1)}
+  .cbtn.has{background:var(--accent-fill);border-color:var(--accent-edge);color:var(--accent-ink)}
+  .cbtn svg{width:12px;height:12px;flex:0 0 auto}
+  .cbtn .n{font-variant-numeric:tabular-nums}
+
+  .cpanel{
+    flex:1 0 100%;margin:8px 0 4px;padding:12px;
+    background:var(--panel);border:1px solid var(--rule-strong);border-radius:10px;
+  }
+  .cpanel[hidden]{display:none}
+
+  .cnote{display:flex;gap:9px;padding:9px 0;border-bottom:1px solid var(--rule)}
+  .cnote:first-child{padding-top:0}
+  .cnote:last-of-type{border-bottom:0}
+  .cav{
+    flex:0 0 auto;width:24px;height:24px;border-radius:999px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:10px;font-weight:900;border:1px solid;
+  }
+  .cav.sean{background:var(--sean-fill);color:var(--sean-ink);border-color:var(--sean-edge)}
+  .cav.kegan{background:var(--kegan-fill);color:var(--kegan-ink);border-color:var(--kegan-edge)}
+  .cbody{flex:1;min-width:0}
+  .cmeta{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:3px}
+  .cmeta b{font-size:12px;color:var(--ink-1)}
+  .cmeta time{font-size:11px;color:var(--ink-3)}
+  .cmeta .del{
+    margin-inline-start:auto;border:0;background:none;cursor:pointer;
+    font:inherit;font-size:11px;font-weight:700;color:var(--ink-3);padding:2px 4px;border-radius:6px;
+  }
+  .cmeta .del:hover{color:var(--both-ink);background:var(--both-fill)}
+  .ctext{font-size:13px;line-height:1.5;color:var(--ink-2);white-space:pre-wrap;overflow-wrap:anywhere}
+  .cshots{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
+  .cshots img{
+    width:88px;height:66px;object-fit:cover;border-radius:6px;
+    border:1px solid var(--rule-strong);cursor:zoom-in;display:block;
+  }
+
+  .cform{margin-top:10px;padding-top:10px;border-top:1px solid var(--rule)}
+  .cform.first{margin-top:0;padding-top:0;border-top:0}
+  .cwho{display:flex;gap:6px;margin-bottom:7px;align-items:center}
+  .cwho span{font-size:10px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)}
+  .cwho button{
+    border:1px solid var(--rule-strong);background:var(--band);color:var(--ink-3);
+    font:inherit;font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;cursor:pointer;
+  }
+  .cwho button[aria-pressed=true].k{background:var(--kegan-fill);color:var(--kegan-ink);border-color:var(--kegan-edge)}
+  .cwho button[aria-pressed=true].s{background:var(--sean-fill);color:var(--sean-ink);border-color:var(--sean-edge)}
+  .cform textarea{
+    width:100%;box-sizing:border-box;min-height:58px;resize:vertical;
+    border:1px solid var(--rule-strong);border-radius:8px;background:var(--bg);
+    color:var(--ink-1);font:inherit;font-size:13px;padding:8px 10px;
+  }
+  .cform textarea:focus{outline:2px solid var(--accent-edge);outline-offset:-1px}
+  .cdrop{
+    margin-top:7px;border:1px dashed var(--rule-strong);border-radius:8px;
+    padding:9px;text-align:center;font-size:11.5px;color:var(--ink-3);cursor:pointer;
+  }
+  .cdrop:hover,.cdrop.over{border-color:var(--accent-edge);color:var(--accent-ink);background:var(--accent-fill)}
+  .cpend{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
+  .cpend figure{position:relative;margin:0}
+  .cpend img{width:72px;height:54px;object-fit:cover;border-radius:6px;border:1px solid var(--rule-strong);display:block}
+  .cpend button{
+    position:absolute;top:-6px;inset-inline-end:-6px;width:18px;height:18px;border-radius:999px;
+    border:1px solid var(--rule-strong);background:var(--panel);color:var(--ink-2);
+    font:inherit;font-size:11px;font-weight:900;line-height:1;cursor:pointer;padding:0;
+  }
+  .crow{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap}
+  .csave{
+    border:1px solid var(--accent-edge);background:var(--accent-fill);color:var(--accent-ink);
+    font:inherit;font-size:12px;font-weight:800;padding:6px 14px;border-radius:8px;cursor:pointer;
+  }
+  .csave:disabled{opacity:.45;cursor:default}
+  .chint{font-size:11px;color:var(--ink-3)}
+
+  /* lightbox */
+  .lightbox{
+    position:fixed;inset:0;z-index:90;background:rgba(8,12,18,.86);
+    display:flex;align-items:center;justify-content:center;padding:24px;cursor:zoom-out;
+  }
+  .lightbox[hidden]{display:none}
+  .lightbox img{max-width:100%;max-height:100%;border-radius:8px;display:block}
+
+  @media print{
+    .cbtn{display:none}
+    .cpanel[hidden]{display:block!important}
+    .cform,.cmeta .del{display:none!important}
+    .cpanel{break-inside:avoid}
+  }
+</style>
+
+<div class="masthead">
+  <div class="wrap">
+    <p class="eyebrow">Flexyn · Build Schedule &amp; Task Tracker</p>
+    <h1>Everything we're shipping, who owns it, and when it's due</h1>
+    <p class="sub">Every line from the original schedule, preserved word for word. Colour = owner. Tick a box and it saves on this device.</p>
+    <div class="ship">
+      <b>September 18 release NO LATER THAN.</b>
+      <span>Hard deadline · weekly deadlines by tuesday</span>
+      <span class="cd mono" id="countdown"></span>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- ================= DUE DATES ================= -->
+  <section id="dates">
+    <h2>Due dates — soonest first</h2>
+    <div class="panel tablewrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Due</th>
+            <th>Section</th>
+            <th>Owner</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="dateRows"></tbody>
+      </table>
+    </div>
+    <div class="notegrid" style="margin-top:14px">
+      <div class="note">
+        <div class="lbl">Top of the original doc</div>
+        <ul class="verbatim">
+          <li>Get Flexyn on Guthub</li>
+          <li>clickable check boxes</li>
+        </ul>
+      </div>
+      <div class="note">
+        <div class="lbl">side points:</div>
+        <ul class="verbatim"><li>nothing app</li></ul>
+      </div>
+      <div class="note">
+        <div class="lbl">timeline</div>
+        <ul class="verbatim">
+          <li>weekly deadlines by tuesday</li>
+          <li>page completion</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= LEGEND + STATS ================= -->
+  <section id="key">
+    <h2>Key</h2>
+    <div class="legend">
+      <div class="item"><span class="sw sean"></span> Blue — <b>Sean</b></div>
+      <div class="item"><span class="sw kegan"></span> Orange / yellow — <b>Kegan</b></div>
+      <div class="item"><span class="sw both"></span> Red — <b>ultra important, both</b></div>
+      <div class="item"><span class="sw none"></span> No highlight — <b>not assigned yet</b></div>
+    </div>
+
+    <div class="stats" id="stats">
+      <div class="stat">
+        <div class="k">All tasks</div>
+        <div class="v"><span id="cAllDone">0</span><small> / <span id="cAllTot">0</span></small></div>
+        <div class="bar all"><i id="bAll" style="width:0%"></i></div>
+      </div>
+      <div class="stat">
+        <div class="k">Sean</div>
+        <div class="v"><span id="cSeanDone">0</span><small> / <span id="cSeanTot">0</span></small></div>
+        <div class="bar sean"><i id="bSean" style="width:0%"></i></div>
+      </div>
+      <div class="stat">
+        <div class="k">Kegan</div>
+        <div class="v"><span id="cKeganDone">0</span><small> / <span id="cKeganTot">0</span></small></div>
+        <div class="bar kegan"><i id="bKegan" style="width:0%"></i></div>
+      </div>
+      <div class="stat">
+        <div class="k">Ultra important (both)</div>
+        <div class="v"><span id="cBothDone">0</span><small> / <span id="cBothTot">0</span></small></div>
+        <div class="bar all"><i id="bBoth" style="width:0%"></i></div>
+      </div>
+    </div>
+
+    <div class="h2h">
+      <div class="top">
+        <h3>Who's carrying more?</h3>
+        <span class="verdict" id="verdict"></span>
+      </div>
+      <div class="h2hbar" id="h2hbar"></div>
+      <p class="caveat" id="h2hcaveat"></p>
+    </div>
+
+    <div class="flagbox">
+      <p><b>Only two lines have no owner yet:</b> <b>Database Integrity</b> and <b>UI/UX</b>, at the very top
+        of the kegan block. They're unhighlighted in the original. Everything else is assigned.</p>
+    </div>
+  </section>
+
+  <!-- ================= TASKS ================= -->
+  <section id="tasks">
+    <h2>Task list — verbatim from the doc</h2>
+    <div class="toolbar">
+      <button type="button" id="fAll" aria-pressed="true">Everything</button>
+      <button type="button" id="fSean" aria-pressed="false">Sean only</button>
+      <button type="button" id="fKegan" aria-pressed="false">Kegan only</button>
+      <button type="button" id="fNotes" aria-pressed="false">With comments</button>
+      <span class="spacer"></span>
+      <button type="button" id="expNotes">Export notes</button>
+      <button type="button" id="impNotes">Import notes</button>
+      <input type="file" id="impFile" accept="application/json,.json" hidden>
+      <button type="button" id="reset">Clear all checkmarks</button>
+    </div>
+
+    <!-- ---------- kegan block ---------- -->
+    <div class="group">
+      <div class="grouphead">
+        <h3>kegan</h3>
+        <span class="src">page 2 of the doc</span>
+        <span class="count" data-count></span>
+      </div>
+      <ul class="tasks">
+        <li class="task o-none"><label><input type="checkbox"><span class="txt">Database Integrity</span></label><span class="chip none">unassigned</span></li>
+        <li class="task o-none"><label><input type="checkbox"><span class="txt">UI/UX</span></label><span class="chip none">unassigned</span></li>
+      </ul>
+
+      <div class="subhead">Workout Page</div>
+      <ul class="tasks">
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Regimens</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Goals</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">All Workouts</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Duels</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Bounties</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Gym Rival</span></label><span class="chip sean">Sean</span></li>
+      </ul>
+
+      <div class="subhead o-sean">Hub</div>
+      <ul class="tasks">
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Global Feed</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Following Feed</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Crews</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Stories</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Build Your Feed</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">New Post</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Hub Filters</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Hub Post Containers</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Repost</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Share</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Mute</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Block</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Report</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Marketplace</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Confirm profile avatar and @username routes to selected users profile page</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Likes</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Comments</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Stickers</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Replies</span></label><span class="chip sean">Sean</span></li>
+      </ul>
+    </div>
+
+    <!-- ---------- nutrition ---------- -->
+    <div class="group">
+      <div class="grouphead">
+        <h3>Nutritition</h3>
+        <span class="src">spelled as in the original</span>
+        <span class="count" data-count></span>
+      </div>
+
+      <div class="subhead o-kegan">Meal Logging</div>
+      <ul class="tasks">
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Log meal (manual entry)</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Recognize meal (photo via AI)</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Search food database</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Macros display</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Calories display</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Quick add (favorites)</span></label><span class="chip sean">Sean</span></li>
+      </ul>
+
+      <div class="subhead o-kegan">Meal Plans</div>
+      <ul class="tasks">
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">View assigned plan</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Meal suggestions</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Swap meals</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Mark completed</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Day view</span></label><span class="chip sean">Sean</span></li>
+      </ul>
+
+      <div class="subhead o-kegan">Food Database</div>
+      <ul class="tasks">
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Search by name</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Filter by macro profile</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Barcode scan</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Add custom food</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Recent foods</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Favorites</span></label><span class="chip sean">Sean</span></li>
+      </ul>
+
+      <div class="subhead">Recipes</div>
+      <ul class="tasks">
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">View saved recipes</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Create recipe</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Log recipe as meal</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Share recipe to crew</span></label><span class="chip sean">Sean</span></li>
+      </ul>
+
+      <div class="subhead o-kegan">Dashboard</div>
+      <ul class="tasks">
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Daily macros (carbs/protein/fat)</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Calorie budget remaining</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Macro pie chart</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Nutrition goals progress</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Weekly trend</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">History/past days</span></label><span class="chip sean">Sean</span></li>
+      </ul>
+
+      <div class="subhead o-sean">Settings</div>
+      <ul class="tasks">
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Daily calorie target</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Macro split (%)</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Preferred units (g/oz)</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Dietary restrictions</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Allergies</span></label><span class="chip sean">Sean</span></li>
+        <li class="task blank o-none"><span class="txt">— empty bullet in the original doc, kept as a placeholder —</span></li>
+        <li class="task blank o-none"><span class="txt">— empty bullet in the original doc, kept as a placeholder —</span></li>
+      </ul>
+    </div>
+
+    <!-- ---------- progress tab ---------- -->
+    <div class="group">
+      <div class="grouphead">
+        <h3>PROGRESS TAB</h3>
+        <span class="src">page 4–5 of the doc</span>
+        <span class="count" data-count></span>
+      </div>
+
+      <div class="subhead">Goals</div>
+      <ul class="tasks">
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Target date</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Progress bar</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Archive goal</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Active goals</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Completed goals</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Create goal</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Goal type (workout, nutrition, streak, etc.)</span></label><span class="chip sean">Sean</span></li>
+      </ul>
+
+      <div class="subhead o-sean">Streaks</div>
+      <ul class="tasks">
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Current streaks (by category)</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Streak count (days)</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Streak rescue (if available)</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Break streak warning</span></label><span class="chip sean">Sean</span></li>
+      </ul>
+
+      <div class="subhead o-kegan">Achievements</div>
+      <ul class="tasks">
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Unlocked badges</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Progress toward next badges</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Achievement categories</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Date unlocked</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Share achievement</span></label><span class="chip kegan">Kegan</span></li>
+      </ul>
+
+      <div class="subhead">Body Metrics</div>
+      <ul class="tasks">
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Weight log</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Measurements (chest, waist, etc.)</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Body fat %</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Chart over time</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Trend indicator</span></label><span class="chip kegan">Kegan</span></li>
+      </ul>
+
+      <div class="subhead">Stats Dashboard</div>
+      <ul class="tasks">
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Total workouts</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Total workout time</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Total calories burned</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">PR (personal record) lifts</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Volume (lbs/kg moved)</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Workout frequency (avg/week)</span></label><span class="chip kegan">Kegan</span></li>
+      </ul>
+
+      <div class="subhead">Leaderboard/Rankings</div>
+      <ul class="tasks">
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Friend leaderboard</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Crew leaderboard</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Global leaderboard</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Filter by timeframe (week/month/all-time)</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Your rank position</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Points system explanation</span></label><span class="chip sean">Sean</span></li>
+      </ul>
+
+      <div class="subhead">Level &amp; XP</div>
+      <ul class="tasks">
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Current level</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">XP bar to next level</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Total XP earned</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">XP breakdown by activity type</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Level history</span></label><span class="chip sean">Sean</span></li>
+      </ul>
+
+      <div class="subhead o-sean">Trophies/Badges</div>
+      <ul class="tasks">
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Collection display</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Trophy rarity/tiers</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">How to earn each</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Progress toward locked trophies</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Share trophy</span></label><span class="chip sean">Sean</span></li>
+      </ul>
+    </div>
+
+    <!-- ---------- profile menu ---------- -->
+    <div class="group">
+      <div class="grouphead">
+        <h3>Profile Menu (Top Right)</h3>
+        <span class="src">page 5–7 of the doc</span>
+        <span class="count" data-count></span>
+      </div>
+      <ul class="tasks">
+        <li class="task blank o-none"><span class="txt">— empty bullet in the original doc, kept as a placeholder —</span></li>
+      </ul>
+
+      <div class="subhead">My Profile</div>
+      <ul class="tasks">
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Profile photo/avatar</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Username (@handle)</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Display name</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Bio/about</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Location</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Gym name (if set)</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Verified badge (if applicable)</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Edit profile</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">View public profile</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Follow/unfollow button (for others)</span></label><span class="chip sean">Sean</span></li>
+      </ul>
+
+      <div class="subhead">My Achievements</div>
+      <ul class="tasks">
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Unlocked achievements count</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Achievement list (same as Progress tab)</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Filter by category</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Share achievement</span></label><span class="chip kegan">Kegan</span></li>
+      </ul>
+
+      <div class="subhead">My Gym</div>
+      <ul class="tasks">
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Gym name</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Gym check-ins count</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Verify gym status (pending/verified)</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Leave gym</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Switch gym</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">View gym members</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Gym feed (if your gym has one)</span></label><span class="chip kegan">Kegan</span></li>
+      </ul>
+
+      <div class="subhead o-sean">My Journal</div>
+      <ul class="tasks">
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Journal entries list</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Filter by date</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Search entries</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Create new entry</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Edit entry</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Delete entry</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Privacy toggle (private/crew/public)</span></label><span class="chip sean">Sean</span></li>
+      </ul>
+
+      <div class="subhead o-sean">My Status</div>
+      <ul class="tasks">
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Current status note</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Status history</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Set status</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Edit status</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Status likes/reactions</span></label><span class="chip sean">Sean</span></li>
+      </ul>
+
+      <div class="subhead">My Trophies</div>
+      <ul class="tasks">
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Collection (same as Progress)</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Sort by rarity</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Filter locked/unlocked</span></label><span class="chip kegan">Kegan</span></li>
+      </ul>
+    </div>
+
+    <!-- ---------- settings ---------- -->
+    <div class="group">
+      <div class="grouphead">
+        <h3>Settings</h3>
+        <span class="src">inside the profile menu</span>
+        <span class="count" data-count></span>
+      </div>
+
+      <div class="subhead o-kegan">Account</div>
+      <ul class="tasks">
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Email</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Phone number</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Change password</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Two-factor auth</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Login history</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Connected devices</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Sessions (sign out all)</span></label><span class="chip sean">Sean</span></li>
+      </ul>
+
+      <div class="subhead">Privacy</div>
+      <ul class="tasks">
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Data export</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Account deletion</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Profile visibility (public/private)</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Allow DMs (anyone/friends/none)</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Block users list</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Muted users list</span></label><span class="chip sean">Sean</span></li>
+      </ul>
+
+      <div class="subhead">Notifications</div>
+      <ul class="tasks">
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Push notifications (on/off)</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Email digest (on/off, frequency)</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Notification types (quest, streak, challenge, message, etc.)</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Quiet hours</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Sound settings</span></label><span class="chip kegan">Kegan</span></li>
+      </ul>
+
+      <div class="subhead">Preferences</div>
+      <ul class="tasks">
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Theme (light/dark/system)</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Units (lbs/kg, miles/km)</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Language</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Timezone</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Measurement preferences (body metrics units)</span></label><span class="chip sean">Sean</span></li>
+      </ul>
+
+      <div class="subhead">About App</div>
+      <ul class="tasks">
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Report bug</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Support URL</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Version</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Release notes</span></label><span class="chip sean">Sean</span></li>
+        <li class="task blank o-none"><span class="txt">— empty bullet in the original doc, kept as a placeholder —</span></li>
+        <li class="task o-both"><label><input type="checkbox"><span class="txt">Terms of service</span></label><span class="chip both">BOTH · ultra</span></li>
+        <li class="task o-both"><label><input type="checkbox"><span class="txt">Privacy policy</span></label><span class="chip both">BOTH · ultra</span></li>
+        <li class="task o-both"><label><input type="checkbox"><span class="txt">Acknowledgments</span></label><span class="chip both">BOTH · ultra</span></li>
+      </ul>
+      <div class="redcall">(Red is ultra important both)</div>
+    </div>
+
+    <!-- ---------- crew / invite / sign out ---------- -->
+    <div class="group">
+      <div class="grouphead">
+        <h3>My Crew · Invite Friends · Sign Out</h3>
+        <span class="src">page 7 of the doc</span>
+        <span class="count" data-count></span>
+      </div>
+
+      <div class="subhead">My Crew</div>
+      <ul class="tasks">
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Crews you're in</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Crew role (member/admin/founder)</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Leave crew</span></label><span class="chip sean">Sean</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Create crew</span></label><span class="chip sean">Sean</span></li>
+      </ul>
+
+      <div class="subhead o-kegan">Invite Friends</div>
+      <ul class="tasks">
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Share referral link</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-kegan"><label><input type="checkbox"><span class="txt">Rewards program</span></label><span class="chip kegan">Kegan</span></li>
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Invite history</span></label><span class="chip sean">Sean</span></li>
+      </ul>
+
+      <div class="subhead o-sean">Sign Out</div>
+      <ul class="tasks">
+        <li class="task o-sean"><label><input type="checkbox"><span class="txt">Sign out current session</span></label><span class="chip sean">Sean</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    Reformatted from <span class="mono">Schedule.pdf</span>. Nothing was cut — every bullet, heading and side note
+    is here in its original wording, including <span class="mono">Guthub</span> and <span class="mono">Nutritition</span>,
+    which are spelled as they appear in the source. Checkmarks save to this browser only.
+  </footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- deadlines ---------- */
+  var DEADLINES = [
+    {d:"2026-08-13", label:"8/13/26", section:"Progress:",     who:"kegan"},
+    {d:"2026-08-13", label:"8/13/26", section:"Hub",           who:"sean"},
+    {d:"2026-08-15", label:"8/15/26", section:"Nutrition",     who:"kegan", mark:true},
+    {d:"2026-08-16", label:"8/16/26", section:"Onboarding",    who:"kegan"},
+    {d:"2026-08-16", label:"8/16/26", section:"Profile",       who:"sean"},
+    {d:"2026-08-17", label:"8/17/26", section:"Dashboard",     who:"kegan"},
+    {d:"2026-08-18", label:"8/18/26", section:"Workout Page",  who:"kegan"},
+    {d:"2026-08-18", label:"8/18/26", section:"Profile",       who:"kegan"},
+    {d:"2026-08-18", label:"8/18/26", section:"Progress:",     who:"sean"},
+    {d:"2026-08-20", label:"8/20/26", section:"Nutrition",     who:"sean"},
+    {d:"2026-08-22", label:"8/22/26", section:"Workout Page",  who:"sean"}
+  ];
+
+  var today = new Date(); today.setHours(0,0,0,0);
+  function days(iso){
+    var t = new Date(iso + "T00:00:00");
+    return Math.round((t - today) / 86400000);
+  }
+
+  var rows = document.getElementById("dateRows");
+  DEADLINES.forEach(function(x){
+    var n = days(x.d);
+    var tr = document.createElement("tr");
+    if (n < 0) tr.className = "past";
+
+    var td1 = document.createElement("td");
+    td1.className = "date mono";
+    if (x.mark){
+      td1.innerHTML = '8/<mark style="background:var(--kegan-fill);color:var(--kegan-ink);padding:0 2px;border-radius:2px">15</mark>/26';
+    } else {
+      td1.textContent = x.label;
+    }
+
+    var td2 = document.createElement("td");
+    td2.className = "sect";
+    td2.textContent = x.section;
+
+    var td3 = document.createElement("td");
+    var chip = document.createElement("span");
+    chip.className = "chip " + x.who;
+    chip.textContent = x.who === "sean" ? "Sean" : "Kegan";
+    td3.appendChild(chip);
+
+    var td4 = document.createElement("td");
+    td4.className = "daysleft";
+    if (n < 0)       { td4.textContent = Math.abs(n) + (Math.abs(n) === 1 ? " day ago" : " days ago"); td4.className += " warn"; }
+    else if (n === 0){ td4.textContent = "due today"; td4.className += " warn"; }
+    else if (n === 1){ td4.textContent = "tomorrow"; td4.className += " warn"; }
+    else             { td4.textContent = "in " + n + " days"; }
+
+    tr.appendChild(td1); tr.appendChild(td2); tr.appendChild(td3); tr.appendChild(td4);
+    rows.appendChild(tr);
+  });
+
+  /* ---------- countdown to release ---------- */
+  var rel = days("2026-09-18");
+  var cd = document.getElementById("countdown");
+  cd.textContent = rel > 0 ? rel + " days out" : (rel === 0 ? "TODAY" : Math.abs(rel) + " days past");
+
+  /* ---------- checkbox persistence ---------- */
+  var KEY = "flexyn.schedule.v1";
+  var state = {};
+  try { state = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; } catch(e){ state = {}; }
+  function save(){ try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){} }
+
+  var boxes = [].slice.call(document.querySelectorAll("li.task input[type=checkbox]"));
+  boxes.forEach(function(box, i){
+    var li = box.closest("li.task");
+    var id = i + "|" + li.querySelector(".txt").textContent.trim().slice(0,60);
+    box.dataset.id = id;
+    if (state[id]) { box.checked = true; li.classList.add("done"); }
+    box.addEventListener("change", function(){
+      li.classList.toggle("done", box.checked);
+      if (box.checked) state[id] = 1; else delete state[id];
+      save(); recount();
+    });
+  });
+
+  /* ---------- counts ---------- */
+  function setBar(el, done, tot){ el.style.width = (tot ? (done/tot*100) : 0) + "%"; }
+  function recount(){
+    var t = {all:[0,0], sean:[0,0], kegan:[0,0], both:[0,0]};
+    boxes.forEach(function(b){
+      var li = b.closest("li.task");
+      var k = li.classList.contains("o-sean") ? "sean"
+            : li.classList.contains("o-kegan") ? "kegan"
+            : li.classList.contains("o-both") ? "both" : null;
+      t.all[1]++; if (b.checked) t.all[0]++;
+      if (k){ t[k][1]++; if (b.checked) t[k][0]++; }
+    });
+    document.getElementById("cAllDone").textContent   = t.all[0];
+    document.getElementById("cAllTot").textContent    = t.all[1];
+    document.getElementById("cSeanDone").textContent  = t.sean[0];
+    document.getElementById("cSeanTot").textContent   = t.sean[1];
+    document.getElementById("cKeganDone").textContent = t.kegan[0];
+    document.getElementById("cKeganTot").textContent  = t.kegan[1];
+    document.getElementById("cBothDone").textContent  = t.both[0];
+    document.getElementById("cBothTot").textContent   = t.both[1];
+    setBar(document.getElementById("bAll"),   t.all[0],   t.all[1]);
+    setBar(document.getElementById("bSean"),  t.sean[0],  t.sean[1]);
+    setBar(document.getElementById("bKegan"), t.kegan[0], t.kegan[1]);
+    setBar(document.getElementById("bBoth"),  t.both[0],  t.both[1]);
+
+    [].slice.call(document.querySelectorAll(".group")).forEach(function(g){
+      var bs = g.querySelectorAll("li.task input[type=checkbox]");
+      var dn = g.querySelectorAll("li.task input[type=checkbox]:checked").length;
+      var c = g.querySelector("[data-count]");
+      if (c) c.textContent = dn + " / " + bs.length + " done";
+    });
+  }
+  recount();
+
+  /* ---------- owner split on every subsection header ---------- */
+  function ownerOf(li){
+    if (li.classList.contains("o-kegan")) return "k";
+    if (li.classList.contains("o-sean"))  return "b";
+    if (li.classList.contains("o-both"))  return "r";
+    if (li.classList.contains("o-grey"))  return "g";
+    return null;
+  }
+  [].slice.call(document.querySelectorAll(".subhead")).forEach(function(head){
+    var list = head.nextElementSibling;
+    if (!list || list.tagName !== "UL") return;
+    var tally = {k:0,b:0,g:0,r:0};
+    [].slice.call(list.querySelectorAll("li.task")).forEach(function(li){
+      var o = ownerOf(li); if (o) tally[o]++;
+    });
+    var wrap = document.createElement("span");
+    wrap.className = "split";
+    [["k","Kegan"],["b","Sean"],["g","?"],["r","both"]].forEach(function(p){
+      if (!tally[p[0]]) return;
+      var s = document.createElement("span");
+      s.className = "s " + p[0];
+      s.textContent = tally[p[0]] + " " + p[1];
+      wrap.appendChild(s);
+    });
+    if (wrap.children.length) head.appendChild(wrap);
+  });
+
+  /* ---------- head to head ---------- */
+  (function(){
+    var tally = {k:0,b:0,g:0,r:0};
+    [].slice.call(document.querySelectorAll("li.task")).forEach(function(li){
+      var o = ownerOf(li); if (o) tally[o]++;
+    });
+    var total = boxes.length;
+    var bar = document.getElementById("h2hbar");
+    [["k", tally.k, "Kegan " + tally.k],
+     ["b", tally.b, "Sean " + tally.b],
+     ["r", tally.r, tally.r + " both"],
+     ["g", tally.g, "? " + tally.g]].forEach(function(p){
+      if (!p[1]) return;
+      var s = document.createElement("span");
+      s.className = p[0];
+      s.style.flex = p[1] + " 1 0";
+      s.style.minWidth = "62px";
+      s.textContent = p[2];
+      bar.appendChild(s);
+    });
+
+    var lead = tally.b - tally.k;
+    var who  = lead > 0 ? "Sean" : (lead < 0 ? "Kegan" : "Dead even");
+    document.getElementById("verdict").textContent =
+      lead === 0
+        ? "Dead even at " + tally.b + " each"
+        : who + " has " + Math.abs(lead) + " more — " + tally.b + " Sean vs " + tally.k + " Kegan";
+
+    var pct = Math.round(tally.b / (tally.b + tally.k) * 100);
+    document.getElementById("h2hcaveat").innerHTML =
+      "<b>" + total + " tasks total.</b> " + tally.r + " red ones count for both of you, " +
+      "and 2 are still unassigned. " +
+      "Sean is carrying <b>" + pct + "%</b> of the assigned work. Count isn't effort though — " +
+      "Database Integrity and UI/UX sit unassigned at the top of Kegan's block and neither is small.";
+  })();
+
+  /* ================= comments on every task ================= */
+  var NKEY = "flexyn.schedule.notes.v1";
+  var WKEY = "flexyn.schedule.whoami";
+  var notes = {};
+  try { notes = JSON.parse(localStorage.getItem(NKEY) || "{}") || {}; } catch(e){ notes = {}; }
+  var whoami = localStorage.getItem(WKEY) || "sean";
+
+  function saveNotes(){
+    try {
+      localStorage.setItem(NKEY, JSON.stringify(notes));
+      return true;
+    } catch(e){
+      alert("Out of storage on this device — that image was too big to save.\n\n" +
+            "Use Export notes in the toolbar to back up what you have, then delete a few " +
+            "image comments to free space.");
+      return false;
+    }
+  }
+
+  /* stable key: section + subsection + task text, so reordering rows never orphans a note */
+  function noteKey(li){
+    var list = li.closest("ul");
+    var sub  = list && list.previousElementSibling && list.previousElementSibling.classList.contains("subhead")
+             ? list.previousElementSibling.firstChild.textContent.trim() : "";
+    var grp  = li.closest(".group");
+    var head = grp ? grp.querySelector(".grouphead") : null;
+    var gt   = head ? head.firstChild.textContent.trim() : "";
+    return gt + "::" + sub + "::" + li.querySelector(".txt").textContent.trim().slice(0, 70);
+  }
+
+  function ago(ts){
+    var s = Math.floor((Date.now() - ts) / 1000);
+    if (s < 60) return "just now";
+    var m = Math.floor(s/60);   if (m < 60) return m + (m===1?" min ago":" mins ago");
+    var h = Math.floor(m/60);   if (h < 24) return h + (h===1?" hour ago":" hours ago");
+    var d = Math.floor(h/24);   if (d < 7)  return d + (d===1?" day ago":" days ago");
+    var w = Math.floor(d/7);    if (w < 5)  return w + (w===1?" week ago":" weeks ago");
+    var mo= Math.floor(d/30);   if (mo< 12) return mo + (mo===1?" month ago":" months ago");
+    return Math.floor(d/365) + " yr ago";
+  }
+
+  /* downscale before storing — full-res phone shots blow the localStorage quota instantly */
+  function shrink(file, cb){
+    var fr = new FileReader();
+    fr.onload = function(){
+      var img = new Image();
+      img.onload = function(){
+        var max = 1200, w = img.width, h = img.height;
+        if (w > max || h > max){ var r = Math.min(max/w, max/h); w = Math.round(w*r); h = Math.round(h*r); }
+        var cv = document.createElement("canvas");
+        cv.width = w; cv.height = h;
+        cv.getContext("2d").drawImage(img, 0, 0, w, h);
+        cb(cv.toDataURL("image/jpeg", 0.72));
+      };
+      img.onerror = function(){ cb(null); };
+      img.src = fr.result;
+    };
+    fr.onerror = function(){ cb(null); };
+    fr.readAsDataURL(file);
+  }
+
+  var lightbox = document.createElement("div");
+  lightbox.className = "lightbox"; lightbox.hidden = true;
+  lightbox.innerHTML = '<img alt="">';
+  lightbox.addEventListener("click", function(){ lightbox.hidden = true; });
+  document.body.appendChild(lightbox);
+  document.addEventListener("keydown", function(e){ if (e.key === "Escape") lightbox.hidden = true; });
+  function zoom(src){ lightbox.querySelector("img").src = src; lightbox.hidden = false; }
+
+  var ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" ' +
+             'stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 ' +
+             '9.9 9.9 0 0 1-4.2-.9L3 20l1.3-3.9A8.4 8.4 0 0 1 12 3.1a8.4 8.4 0 0 1 9 8.4z"/></svg>';
+
+  [].slice.call(document.querySelectorAll("li.task")).forEach(function(li){
+    if (li.classList.contains("blank")) return;
+    var key = noteKey(li);
+
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "cbtn";
+    li.appendChild(btn);
+
+    var panel = document.createElement("div");
+    panel.className = "cpanel";
+    panel.hidden = true;
+    li.appendChild(panel);
+
+    function count(){ return (notes[key] || []).length; }
+    function paintBtn(){
+      var n = count();
+      btn.innerHTML = ICON + (n ? '<span class="n">' + n + '</span>' : "");
+      btn.classList.toggle("has", n > 0);
+      li.classList.toggle("hasnote", n > 0);
+      btn.setAttribute("aria-expanded", String(!panel.hidden));
+      btn.title = n ? n + (n === 1 ? " comment" : " comments") : "Add a comment";
+      btn.setAttribute("aria-label", btn.title + " — " + li.querySelector(".txt").textContent.trim());
+    }
+
+    var pending = [];
+
+    function paintPanel(){
+      panel.innerHTML = "";
+      var list = notes[key] || [];
+
+      list.forEach(function(n, i){
+        var wrap = document.createElement("div");
+        wrap.className = "cnote";
+
+        var av = document.createElement("div");
+        av.className = "cav " + n.who;
+        av.textContent = n.who === "kegan" ? "K" : "S";
+        wrap.appendChild(av);
+
+        var body = document.createElement("div");
+        body.className = "cbody";
+
+        var meta = document.createElement("div");
+        meta.className = "cmeta";
+        var nm = document.createElement("b");
+        nm.textContent = n.who === "kegan" ? "Kegan" : "Sean";
+        var tm = document.createElement("time");
+        tm.textContent = ago(n.at);
+        tm.dateTime = new Date(n.at).toISOString();
+        tm.title = new Date(n.at).toLocaleString();
+        var del = document.createElement("button");
+        del.type = "button"; del.className = "del"; del.textContent = "Delete";
+        del.addEventListener("click", function(){
+          if (!confirm("Delete this comment?")) return;
+          notes[key].splice(i, 1);
+          if (!notes[key].length) delete notes[key];
+          saveNotes(); paintPanel(); paintBtn();
+        });
+        meta.appendChild(nm); meta.appendChild(tm); meta.appendChild(del);
+        body.appendChild(meta);
+
+        if (n.text){
+          var p = document.createElement("div");
+          p.className = "ctext"; p.textContent = n.text;
+          body.appendChild(p);
+        }
+        if (n.shots && n.shots.length){
+          var sh = document.createElement("div");
+          sh.className = "cshots";
+          n.shots.forEach(function(src){
+            var im = document.createElement("img");
+            im.src = src; im.alt = "attachment";
+            im.addEventListener("click", function(){ zoom(src); });
+            sh.appendChild(im);
+          });
+          body.appendChild(sh);
+        }
+        wrap.appendChild(body);
+        panel.appendChild(wrap);
+      });
+
+      /* ---- composer ---- */
+      var form = document.createElement("div");
+      form.className = "cform" + (list.length ? "" : " first");
+
+      var who = document.createElement("div");
+      who.className = "cwho";
+      who.innerHTML = "<span>Posting as</span>";
+      [["sean","Sean","s"],["kegan","Kegan","k"]].forEach(function(w){
+        var b = document.createElement("button");
+        b.type = "button"; b.className = w[2]; b.textContent = w[1];
+        b.setAttribute("aria-pressed", String(whoami === w[0]));
+        b.addEventListener("click", function(){
+          whoami = w[0];
+          try { localStorage.setItem(WKEY, whoami); } catch(e){}
+          [].slice.call(document.querySelectorAll(".cwho button")).forEach(function(o){
+            o.setAttribute("aria-pressed", String(o.textContent.toLowerCase() === whoami));
+          });
+        });
+        who.appendChild(b);
+      });
+      form.appendChild(who);
+
+      var ta = document.createElement("textarea");
+      ta.placeholder = "What changed? Paste a screenshot straight in here, or drag one below.";
+      form.appendChild(ta);
+
+      var fileIn = document.createElement("input");
+      fileIn.type = "file"; fileIn.accept = "image/*"; fileIn.multiple = true; fileIn.hidden = true;
+      form.appendChild(fileIn);
+
+      var drop = document.createElement("div");
+      drop.className = "cdrop";
+      drop.textContent = "Add image — click, drag a file here, or paste";
+      drop.addEventListener("click", function(){ fileIn.click(); });
+      form.appendChild(drop);
+
+      var pend = document.createElement("div");
+      pend.className = "cpend";
+      form.appendChild(pend);
+
+      function paintPending(){
+        pend.innerHTML = "";
+        pending.forEach(function(src, i){
+          var fig = document.createElement("figure");
+          var im = document.createElement("img"); im.src = src; im.alt = "";
+          im.addEventListener("click", function(){ zoom(src); });
+          var x = document.createElement("button");
+          x.type = "button"; x.textContent = "×"; x.title = "Remove";
+          x.addEventListener("click", function(){ pending.splice(i,1); paintPending(); sync(); });
+          fig.appendChild(im); fig.appendChild(x); pend.appendChild(fig);
+        });
+      }
+      function addFiles(files){
+        [].slice.call(files).forEach(function(f){
+          if (!/^image\//.test(f.type)) return;
+          shrink(f, function(src){ if (src){ pending.push(src); paintPending(); sync(); } });
+        });
+      }
+      fileIn.addEventListener("change", function(){ addFiles(fileIn.files); fileIn.value = ""; });
+      ["dragenter","dragover"].forEach(function(ev){
+        drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.add("over"); });
+      });
+      ["dragleave","drop"].forEach(function(ev){
+        drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.remove("over"); });
+      });
+      drop.addEventListener("drop", function(e){ if (e.dataTransfer) addFiles(e.dataTransfer.files); });
+      ta.addEventListener("paste", function(e){
+        var items = e.clipboardData && e.clipboardData.files;
+        if (items && items.length) addFiles(items);
+      });
+
+      var row = document.createElement("div");
+      row.className = "crow";
+      var savebtn = document.createElement("button");
+      savebtn.type = "button"; savebtn.className = "csave"; savebtn.textContent = "Add comment";
+      var hint = document.createElement("span");
+      hint.className = "chint";
+      hint.textContent = "Saved on this device";
+      row.appendChild(savebtn); row.appendChild(hint);
+      form.appendChild(row);
+
+      function sync(){ savebtn.disabled = !ta.value.trim() && !pending.length; }
+      ta.addEventListener("input", sync);
+      sync();
+
+      savebtn.addEventListener("click", function(){
+        if (!ta.value.trim() && !pending.length) return;
+        if (!notes[key]) notes[key] = [];
+        notes[key].push({ who: whoami, at: Date.now(), text: ta.value.trim(), shots: pending.slice() });
+        if (!saveNotes()) { notes[key].pop(); return; }
+        pending = [];
+        paintPanel(); paintBtn();
+      });
+
+      panel.appendChild(form);
+      paintPending();
+    }
+
+    btn.addEventListener("click", function(){
+      if (panel.hidden){ paintPanel(); panel.hidden = false; }
+      else panel.hidden = true;
+      paintBtn();
+    });
+
+    paintBtn();
+  });
+
+  /* ---------- export / import notes (localStorage is per-device) ---------- */
+  function exportNotes(){
+    var blob = new Blob([JSON.stringify({ notes: notes, done: state }, null, 2)],
+                        { type: "application/json" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "flexyn-schedule-notes.json";
+    a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 2000);
+  }
+  function importNotes(file){
+    var fr = new FileReader();
+    fr.onload = function(){
+      try {
+        var d = JSON.parse(fr.result);
+        if (!d || typeof d !== "object") throw 0;
+        Object.keys(d.notes || {}).forEach(function(k){
+          var mine = notes[k] || [], theirs = d.notes[k] || [];
+          theirs.forEach(function(n){
+            var dupe = mine.some(function(m){ return m.at === n.at && m.who === n.who && m.text === n.text; });
+            if (!dupe) mine.push(n);
+          });
+          mine.sort(function(a,b){ return a.at - b.at; });
+          notes[k] = mine;
+        });
+        Object.keys(d.done || {}).forEach(function(k){ state[k] = 1; });
+        saveNotes(); save();
+        alert("Merged. Reloading.");
+        location.reload();
+      } catch(e){ alert("That file isn't a Flexyn notes export."); }
+    };
+    fr.readAsText(file);
+  }
+
+  /* ---------- filters ---------- */
+  var btns = {all:document.getElementById("fAll"), sean:document.getElementById("fSean"), kegan:document.getElementById("fKegan")};
+  var noteBtn = document.getElementById("fNotes");
+  function setFilter(k){
+    document.body.classList.remove("filter-sean","filter-kegan");
+    if (k !== "all") document.body.classList.add("filter-" + k);
+    Object.keys(btns).forEach(function(n){ btns[n].setAttribute("aria-pressed", String(n === k)); });
+  }
+  Object.keys(btns).forEach(function(n){ btns[n].addEventListener("click", function(){ setFilter(n); }); });
+
+  /* show only rows that carry a comment — layers on top of the owner filter */
+  noteBtn.addEventListener("click", function(){
+    var on = noteBtn.getAttribute("aria-pressed") !== "true";
+    noteBtn.setAttribute("aria-pressed", String(on));
+    document.body.classList.toggle("filter-notes", on);
+  });
+
+  document.getElementById("expNotes").addEventListener("click", exportNotes);
+  document.getElementById("impNotes").addEventListener("click", function(){
+    document.getElementById("impFile").click();
+  });
+  document.getElementById("impFile").addEventListener("change", function(e){
+    if (e.target.files && e.target.files[0]) importNotes(e.target.files[0]);
+    e.target.value = "";
+  });
+
+  document.getElementById("reset").addEventListener("click", function(){
+    boxes.forEach(function(b){ b.checked = false; b.closest("li.task").classList.remove("done"); });
+    state = {}; save(); recount();
+  });
+})();
+</script>
+
+</body></html>
